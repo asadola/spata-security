@@ -1,0 +1,51 @@
+# 🛡️ Spata Platform: Real-Time Field Operations & Security Dashboard
+
+![Java](https://img.shields.io/badge/Java-21-orange)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3-brightgreen)
+![Angular](https://img.shields.io/badge/Angular-17-red)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16_+_PostGIS-blue)
+![Keycloak](https://img.shields.io/badge/Keycloak-24-royalblue)
+
+**Spata** is an enterprise-grade, real-time operations center designed for field security, logistics, and emergency response teams. It provides dispatchers with live telemetry, automated route deviation detection, and secure, spoof-proof check-ins from field agents.
+
+---
+
+## 🌟 Key Features
+
+- **🗺️ Real-Time Spatial Tracking**: Live map visualization using Leaflet.js with dynamic markers and severity-based color coding.
+- **🛣️ Intelligent Route Snapping**: Integrates with OSRM (Open Source Routing Machine) to draw planned routes along actual road networks, not just straight lines.
+- **📏 Automated Deviation Analytics**: Backend PostGIS spatial calculations instantly detect when a field agent deviates from their planned route, categorizing severity (None, Minor, Major, Critical).
+- **🛡️ Brutal Anti-Spoofing Security**: Custom middleware intercepts all field check-ins, analyzing IP addresses to instantly block and log attempts made via VPNs, Proxies, or Tor nodes.
+- **🔐 Enterprise Identity Management**: Fully integrated Keycloak (OIDC/OAuth2) for secure, role-based access control (RBAC) with JWT validation.
+- **✨ Modern Glassmorphism UI**: A sleek, responsive, and highly intuitive Angular 17+ frontend featuring smooth animations, slide-over drawers, and real-time data binding.
+
+---
+
+## 🛠️ Technology Stack
+
+### Frontend
+- **Framework**: Angular 17+ (Standalone Components, Signals-ready)
+- **Styling**: Tailwind CSS (Custom glassmorphism utilities)
+- **Mapping**: Leaflet.js + OSRM API
+- **State & HTTP**: RxJS Observables, Angular HttpClient
+
+### Backend
+- **Framework**: Java 21, Spring Boot 3.3
+- **Security**: Spring Security, Keycloak Adapter, Custom IP/VPN Detection Service
+- **Database ORM**: Hibernate 6, Spring Data JPA
+- **Spatial Engine**: Hibernate Spatial + PostGIS (Geometry/Geography types)
+- **Messaging**: Apache Kafka (Prepared for real-time telemetry streaming)
+
+### Infrastructure
+- **Database**: PostgreSQL 16 with PostGIS extension
+- **Identity Provider**: Keycloak 24 (Dockerized)
+- **Build Tools**: Maven (Backend), Angular CLI / Vite (Frontend)
+
+---
+
+## 🏗️ Architecture Overview
+
+The system follows a strict layered architecture:
+1. **Field Agent** submits a check-in via the Angular mobile-friendly modal (with browser GPS).
+2. **Spring Boot Controller** intercepts the request, runs the `VpnDetectionService`, and rejects spoofed IPs with a `403 Forbidden`.
+3. **Service Layer** converts raw Lat/Lon into a PostGIS `Point` (SRID 4326) and calculates deviation against the
