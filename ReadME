@@ -48,4 +48,28 @@
 The system follows a strict layered architecture:
 1. **Field Agent** submits a check-in via the Angular mobile-friendly modal (with browser GPS).
 2. **Spring Boot Controller** intercepts the request, runs the `VpnDetectionService`, and rejects spoofed IPs with a `403 Forbidden`.
-3. **Service Layer** converts raw Lat/Lon into a PostGIS `Point` (SRID 4326) and calculates deviation against the
+3. **Service Layer** converts raw Lat/Lon into a PostGIS `Point` (SRID 4326) and calculates deviation against the planned route.
+4. **Repository Layer** persists the event to PostgreSQL.
+5. **Dispatcher UI** polls (or listens via WebSocket/Kafka) to update the Leaflet map and sidebar stats in real-time.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Java 21+
+- Node.js 20+ & Angular CLI
+- Docker & Docker Compose
+- PostgreSQL 16 (with PostGIS extension)
+
+### 1. Start Infrastructure (Docker)
+```bash
+docker-compose up -d postgres keycloak kafka
+
+📸 Screenshots
+![alt text](<Mission Submission.png>) ![alt text](Dashboard.png) ![alt text](<Log In.png>) ![alt text](<Mission Details.png>)
+
+👨‍💻 Author
+Built with precision and scalability in mind.
+[Japhet Ngara / GitHub asadola]
+© 2026 Spata Platform. All rights reserved.
