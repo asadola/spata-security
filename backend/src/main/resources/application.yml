@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: spata-backend
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5433/spata_db
+    username: spata_user
+    password: spata_password
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect # Updated to modern dialect
+        format_sql: true
+    show-sql: true
+
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Keycloak's issuer URI (replace 'spata-realm' with the realm name we create)
+          issuer-uri: http://localhost:8082/realms/spata-realm
+          # Explicitly point to the JWKS endpoint for faster startup
+          jwk-set-uri: http://localhost:8082/realms/spata-realm/protocol/openid-connect/certs
+
+  # --- NEW: KAFKA CONFIGURATION ---
+  kafka:
+    bootstrap-servers: localhost:9093
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: spata-notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*" # Trust our own event classes
+
+server:
+  port: 8081
+
+logging:
+  level:
+    com.spata.backend.domain.movement.FieldMovementService: DEBUG

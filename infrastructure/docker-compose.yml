@@ -1,0 +1,65 @@
+services:
+  # 1. Database: PostgreSQL + PostGIS
+  spata-db:
+    image: postgis/postgis:15-3.3
+    container_name: spata-db
+    environment:
+      POSTGRES_DB: spata_db
+      POSTGRES_USER: spata_user
+      POSTGRES_PASSWORD: spata_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - spata_db_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
+
+  # 2. Caching & Sessions: Redis
+  spata-redis:
+    image: redis:7-alpine
+    container_name: spata-redis
+    ports:
+      - "6380:6379"
+    command: redis-server --appendonly yes
+
+  # 3. Message Broker: Official Apache Kafka (KRaft mode)
+  spata-kafka:
+    image: apache/kafka:3.7.0
+    container_name: spata-kafka
+    ports:
+      - "9093:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@spata-kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+    volumes:
+      - spata_kafka_data:/var/lib/kafka/data
+
+  # 4. Identity Provider: Keycloak
+  spata-keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: spata-keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://spata-db:5432/spata_db
+      KC_DB_USERNAME: spata_user
+      KC_DB_PASSWORD: spata_password
+    ports:
+      - "8082:8080"
+    depends_on:
+      - spata-db
+
+volumes:
+  spata_db_data:
+  spata_kafka_data:
